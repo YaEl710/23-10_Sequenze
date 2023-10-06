@@ -1,28 +1,80 @@
-/*
-    PER TUTTE LE PAGINE:
-    1.1) Gestire l'aside come menù in maniera corretta, evidenziando la pagina 
-        attualmente visualizzata
-    1.2) Mettere il proprio cognome e nome nel footer
+var images = [];
+var currentIndex = 0;
+var moves = 0;
+var startTime;
+var timerInterval;
 
-    PER QUESTA PAGINA
-    2) Caricare il puzzle: immagini e titolo prendendone uno a caso da quelli sul db
-        Le immagini su db sono ordinate, quindi è NECESSARIO disordinarle. 
-        PUNTI: 2
+window.onload = function () {
+    initGioco();
 
-    3) Cercare di presentare sempre puzzle diversi 
-        (quando sono stati tutti presentati avvertire l'utente)
-        PUNTI: 0.5
+    function initGioco() {
+        caricaImmagini();
+        startTime = new Date();
+        avviaTimer();
 
-    4.1)  Una mossa è definita da un click su una delle immagini,
-        effettuato un click l'immagine selezionata viene spostata nella cella vuota
-        (il click sulla cella vuota non ha conseguenze)
-        PUNTI: 1.5
-        
-    4.2) Cambiare puzzle dopo tre mosse o quando si è indovinata la sequenza
+        var imgElement1 = document.getElementById('img1');
+        var imgElement3 = document.getElementById('img3');
+        var imgElement4 = document.getElementById('img4');
+        if (imgElement1 && imgElement3 && imgElement4) {
+            imgElement1.addEventListener('click', gestisciClickImmagine);
+            imgElement3.addEventListener('click', gestisciClickImmagine);
+            imgElement4.addEventListener('click', gestisciClickImmagine);
+        } else {
+            console.error("Elementi con gli ID non trovati.");
+        }
+    }
 
+    function caricaImmagini() {
+        try {
+            fetch("DB/index.php")
+                .then(response => response.json())
+                .then(data => {
+                    images = data;
+                    currentIndex = 0;
+                    aggiornaSchermo();
+                })
+                .catch(error => {
+                    console.error('Errore nel recupero dei percorsi delle immagini:', error);
+                });
+        } catch (error) {
+            console.error('Errore nel recupero dei percorsi delle immagini:', error);
+        }
+    }
 
-    5.1) Gestire il tempo di risoluzione, il numero di sequenze/puzzle risolvi,
-        il numero di mosse effettuate
-        PUNTI: 2.5
+    function aggiornaSchermo() {
+        var imgElement1 = document.getElementById('img1');
+        var imgElement3 = document.getElementById('img3');
+        var imgElement4 = document.getElementById('img4');
 
-*/
+        if (currentIndex < images.length) {
+            imgElement1.src = images[currentIndex].img1;
+            imgElement3.src = images[currentIndex].img3;
+            imgElement4.src = images[currentIndex].img2;
+        } else {
+            console.log("Hai completato tutte le sequenze!");
+        }
+    }
+
+    function gestisciClickImmagine() {
+        if (currentIndex < images.length) {
+            moves++;
+            currentIndex++;
+            aggiornaSchermo();
+
+            if (moves % 3 === 0) {
+                caricaImmagini();
+            }
+        }
+    }
+
+    function avviaTimer() {
+        timerInterval = setInterval(aggiornaTimer, 1000);
+    }
+
+    function aggiornaTimer() {
+        const currentTime = new Date();
+        const tempoTrascorso = (currentTime - startTime) / 1000;
+        document.querySelector('footer').textContent = `Tempo trascorso: ${tempoTrascorso.toFixed(0)}s | Mosse: ${moves}`;
+    }
+};
+/*non va nulla se non il tempo*/

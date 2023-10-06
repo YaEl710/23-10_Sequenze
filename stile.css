@@ -144,3 +144,9 @@ button{
 #stat > div > div:first-child{
     font-weight: bold;
 }
+
+
+aside ul li a.active {
+    background-color: #007bff; 
+    color: #fff; 
+}
